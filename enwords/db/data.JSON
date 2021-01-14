@@ -1,0 +1,24 @@
+{
+  "wordSentences": [
+    {
+      "id": 1,
+      "sentences": "How is it going?",
+      "translate" : "Как идут дела?"
+    },
+    {
+      "id": 2,
+      "sentences": "How's life?",
+      "translate" : "Как жизнь?"
+    },
+    {
+      "id": 3,
+      "sentences": "How are things?",
+      "translate" : "Как оно?"
+    },
+    {
+      "id": 4,
+      "sentences": "Long time no see!",
+      "translate" : "Давно не виделись!"
+    }
+  ]
+}

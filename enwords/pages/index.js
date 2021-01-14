@@ -1,87 +1,59 @@
 import Head from 'next/head'
 import {useState, useEffect} from 'react'
 
-export default function Home({data: serverData}) {
-
-  const [word, setWord] = useState(serverData)
-  const [translate, setTranslate] = useState(null)
-  const [nextWord, setNextWord] = useState(false)
-
-  useEffect(() => {
-    async function load() {
-      const res = await fetch('https://wordsapiv1.p.rapidapi.com/words/?random=true', {
-        'method': 'GET',
-        'headers': {
-          'x-rapidapi-key': 'c496f53ae9msh1eff2547b2c0d10p1fceb5jsn5cee8e3ac299',
-          'x-rapidapi-host': 'wordsapiv1.p.rapidapi.com',
-        },
-      })
-      const data = await res.json()
-      setWord(data)
-    }
-
-    if(!serverData || nextWord){
-      load()
-      setNextWord(false)
-    }
-  }, [nextWord])
-
-  // useEffect(()=>{
-  //
-  // },[setNextWord])
-
-  if(!word){
-    return (<div>Loading...</div>)
-  }
-
-
-return (
-  <div className="container">
-    <Head>
-      <title>Английский</title>
-      <link rel="icon" href="/favicon.ico"/>
-    </Head>
-
-    <main>
-      <div>
-        <div>
-          {<p>Слово: {word.word}</p>}
-        </div>
-        <div>
-          {<p>Описание: {word.results? word.results[0].definition: 'Отсутствует'}</p>}
-        </div>
-        <div>
-          {translate && <p>Перевод: {translate}</p>}
-        </div>
-        <div>
-          <button>Перевести</button>
-          <button onClick={()=> setNextWord(true)}>Следующее</button>
-        </div>
-      </div>
-    </main>
-
-    <footer>
-
-    </footer>
-
-
-  </div>
-)
+function getRandomIntInclusive(min, max) {
+  min = Math.ceil(min)
+  max = Math.floor(max)
+  return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
-export async function getServerSideProps(context) {
-  const res = await fetch('https://wordsapiv1.p.rapidapi.com/words/?random=true', {
-    'method': 'GET',
-    'headers': {
-      'x-rapidapi-key': 'c496f53ae9msh1eff2547b2c0d10p1fceb5jsn5cee8e3ac299',
-      'x-rapidapi-host': 'wordsapiv1.p.rapidapi.com',
-    },
-  })
-    .catch(err => {
-      console.error('ERROR', err)
-    })
+export default function Home({data: serverData}) {
+  const [words, setWords] = useState(serverData)
+  const [currentIndex, setCurrentIndex] = useState(null)
+  const [currentWord, setCurrentWord] = useState(null)
+  const [next, setNext] = useState(0)
 
-  const data = await res.json()
+  useEffect(()=>{
+    let res = getRandomIntInclusive(0, words.wordSentences.length -1 )
+    if(res === currentIndex){
+      res = getRandomIntInclusive(0, words.wordSentences.length -1 )
+    }
+    setCurrentIndex(res)
+  },[next])
+
+  useEffect(()=>{
+    const foundWord = words.wordSentences[currentIndex]
+    console.log('foundWord', foundWord)
+    setCurrentWord(foundWord)
+  },[currentIndex])
+
+  return (
+    <div className="container">
+      <Head>
+        <title>Учим английский по разговорным фразам</title>
+        <link rel="icon" href="/favicon.ico"/>
+      </Head>
+
+      <main>
+        <div>
+          <div>
+            {currentWord && <div>
+              <p>{currentWord.sentences}</p>
+              <p>{currentWord.translate}</p>
+            </div>}
+          </div>
+          <div>
+            <button>Перевести</button>
+            <button onClick={()=> setNext(next + 1)}>Следующее</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+export async function getServerSideProps() {
+  const data = require('../db/data.JSON')
 
   if (!data) {
     return {
